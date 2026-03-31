@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة الكادر الطبي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI'; background: #f0f4f8; margin: 0; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); max-width: 900px; margin: auto; }
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
+        .btn-save { background: #1a2a6c; color: white; padding: 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; grid-column: span 2; font-size: 1.1rem; margin-top: 10px; }
+        table { width: 100%; margin-top: 30px; border-collapse: collapse; }
+        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; }
+        th { background: #1a2a6c; color: white; }
+    </style>
+</head>
+<body>
+    <div style="margin-bottom:20px;"><a href="index.html" style="text-decoration:none; color:#1a2a6c;">⬅ العودة للرئيسية</a></div>
+    <div class="card">
+        <h2><i class="fas fa-user-md"></i> إضافة طبيب جديد</h2>
+        <div class="grid-form">
+            <input type="number" id="docId" placeholder="رقم الطبيب (Did)">
+            <input type="text" id="docName" placeholder="اسم الطبيب">
+            <input type="text" id="docSpec" placeholder="التخصص (قسم)">
+            <input type="number" id="docPhone" placeholder="رقم الهاتف">
+            <input type="email" id="docEmail" placeholder="البريد الإلكتروني" style="grid-column: span 2;">
+            <button class="btn-save" onclick="saveDoctor()">حفظ بيانات الطبيب</button>
+        </div>
+        <table id="docTable">
+            <thead>
+                <tr><th>الرقم</th><th>الاسم</th><th>التخصص</th><th>الهاتف</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+       
+
+    <script>
+        function saveDoctor() {
+            let d = { id: document.getElementById('docId').value, name: document.getElementById('docName').value, spec: document.getElementById('docSpec').value, phone: document.getElementById('docPhone').value };
+            let list = JSON.parse(localStorage.getItem('doctors')) || [];
+            list.push(d);
+            localStorage.setItem('doctors', JSON.stringify(list));
+            alert("تم حفظ بيانات الطبيب!");
+            location.reload();
+        }
+        window.onload = function() {
+            let list = JSON.parse(localStorage.getItem('doctors')) || [];
+            let tbody = document.querySelector("#docTable tbody");
+            list.forEach(d => {
+                tbody.innerHTML += `<tr><td>${d.id}</td><td>${d.name}</td><td>${d.spec}</td><td>${d.phone}</td></tr>`;
+            });
+        }
+    </script>
+</body>
+</html>

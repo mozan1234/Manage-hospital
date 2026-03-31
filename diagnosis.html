@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>التشخيص الطبي  </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI'; background: #f8f9fa; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); max-width: 900px; margin: auto; border-top: 6px solid #d35400; }
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        input, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
+        .btn-save { background: #d35400; color: white; padding: 15px; border: none; border-radius: 8px; cursor: pointer; grid-column: span 2; font-weight: bold; }
+        table { width: 100%; margin-top: 30px; border-collapse: collapse; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: center; }
+        th { background: #d35400; color: white; }
+    </style>
+</head>
+<body>
+    <div style="margin-bottom:20px;"><a href="index.html" style="text-decoration:none; color:#d35400;">⬅ العودة للرئيسية</a></div>
+    <div class="card">
+        <h2><i class="fas fa-notes-medical"></i> تسجيل التشخيص الطبي</h2>
+        <div class="grid-form">
+            <input type="number" id="diaId" placeholder="رقم التشخيص (Diaid)">
+            <input type="number" id="paId" placeholder="رقم المريض (Paid)">
+            <input type="number" id="docId" placeholder="رقم الطبيب (Did)">
+            <input type="text" id="disease" placeholder="المرض (Disease)">
+            <input type="text" id="treat" placeholder="العلاج (Treatment)">
+            <input type="text" id="doses" placeholder="الجرعات (Doses)">
+            <button class="btn-save" onclick="saveDiagnosis()">حفظ التشخيص</button>
+        </div>
+        <table id="diaTable">
+            <thead>
+                <tr><th>رقم التشخيص</th><th>المريض</th><th>المرض</th><th>العلاج</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <script>
+        function saveDiagnosis() {
+            let d = { id: document.getElementById('diaId').value, paid: document.getElementById('paId').value, disease: document.getElementById('disease').value, treat: document.getElementById('treat').value };
+            let list = JSON.parse(localStorage.getItem('diagnoses')) || [];
+            list.push(d);
+            localStorage.setItem('diagnoses', JSON.stringify(list));
+            location.reload();
+        }
+        window.onload = function() {
+            let list = JSON.parse(localStorage.getItem('diagnoses')) || [];
+            let tbody = document.querySelector("#diaTable tbody");
+            list.forEach(d => { tbody.innerHTML += `<tr><td>${d.id}</td><td>${d.paid}</td><td>${d.disease}</td><td>${d.treat}</td></tr>`; });
+        }
+    </script>
+</body>
+</html>

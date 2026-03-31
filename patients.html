@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>سجل المرضى المحوسب </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #1a2a6c; --secondary: #3498db; --success: #27ae60; --danger: #e74c3c; --light: #f8f9fa; }
+        body { font-family: 'Segoe UI', Tahoma; background: #eef2f7; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; }
+        
+        /* تصميم البطاقة */
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 30px; border-top: 5px solid var(--primary); }
+        h2 { color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        
+        /* شبكة النموذج */
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.9rem; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; transition: 0.3s; }
+        input:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+        
+        /* الأزرار */
+        .btn-group { grid-column: span 3; display: flex; gap: 10px; margin-top: 10px; }
+        button { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-save { background: var(--success); color: white; flex: 2; justify-content: center; }
+        .btn-clear { background: #95a5a6; color: white; flex: 1; justify-content: center; }
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* البحث والجدول */
+        .search-box { margin-bottom: 20px; position: relative; }
+        .search-box input { width: 100%; padding-right: 40px; }
+        .search-box i { position: absolute; right: 15px; top: 40px; color: #999; }
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        th { background: var(--primary); color: white; padding: 15px; text-align: center; }
+        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.95rem; }
+        tr:hover { background: #f1f7ff; }
+        .actions { display: flex; gap: 5px; justify-content: center; }
+        .btn-del { background: var(--danger); color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="margin-bottom: 20px;">
+        <a href="index.html" style="text-decoration:none; color:var(--primary); font-weight:bold;">
+            <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
+        </a>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-user-plus"></i> تسجيل بيانات مريض جديد</h2>
+        <form id="patientForm" class="form-grid">
+            <div class="form-group">
+                <label>رقم المريض (Paid)</label>
+                <input type="number" id="paId" required>
+            </div>
+            <div class="form-group">
+                <label>الاسم الكامل (paname)</label>
+                <input type="text" id="paName" required>
+            </div>
+            <div class="form-group">
+                <label>رقم الهاتف (Tell)</label>
+                <input type="number" id="paTell">
+            </div>
+            <div class="form-group">
+                <label>العمر (Page)</label>
+                <input type="number" id="paAge">
+            </div>
+            <div class="form-group">
+                <label>العنوان (paaddress)</label>
+                <input type="text" id="paAddress">
+            </div>
+            <div class="form-group">
+                <label>النوع (Pasex)</label>
+                <select id="paSex">
+                    <option value="ذكر">ذكر</option>
+                    <option value="أنثى">أنثى</option>
+                </select>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn-save" onclick="saveData()"><i class="fas fa-save"></i> حفظ في سجلات المتصفح</button>
+                <button type="reset" class="btn-clear"><i class="fas fa-eraser"></i> مسح الحقول</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-address-book"></i> السجلات المخزنة محلياً</h2>
+        <div class="search-box">
+            <label>البحث السريع:</label>
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="ابحث باسم المريض أو العنوان...">
+            <i class="fas fa-search"></i>
+        </div>
+        <table id="patientTable">
+            <thead>
+                <tr>
+                    <th>الرقم</th>
+                    <th>الاسم</th>
+                    <th>الهاتف</th>
+                    <th>العمر</th>
+                    <th>العنوان</th>
+                    <th>النوع</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // وظيفة الحفظ
+    function saveData() {
+        const pId = document.getElementById('paId').value;
+        const pName = document.getElementById('paName').value;
+        
+        if(!pId || !pName) { alert("يرجى إدخال الرقم والاسم على الأقل"); return; }
+
+        let patient = {
+            id: pId,
+            name: pName,
+            phone: document.getElementById('paTell').value,
+            age: document.getElementById('paAge').value,
+            address: document.getElementById('paAddress').value,
+            sex: document.getElementById('paSex').value
+        };
+
+        let list = JSON.parse(localStorage.getItem('patients_db')) || [];
+        list.push(patient);
+        localStorage.setItem('patients_db', JSON.stringify(list));
+        
+        alert("تم الحفظ بنجاح!");
+        document.getElementById('patientForm').reset();
+        loadTable();
+    }
+
+    // وظيفة تحميل الجدول
+    function loadTable() {
+        let list = JSON.parse(localStorage.getItem('patients_db')) || [];
+        let tbody = document.querySelector("#patientTable tbody");
+        tbody.innerHTML = "";
+
+        list.forEach((p, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${p.id}</td>
+                    <td>${p.name}</td>
+                    <td>${p.phone}</td>
+                    <td>${p.age}</td>
+                    <td>${p.address}</td>
+                    <td>${p.sex}</td>
+                    <td class="actions">
+                        <button class="btn-del" onclick="deleteItem(${index})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // وظيفة الحذف
+    function deleteItem(index) {
+        if(confirm("هل أنت متأكد من حذف هذا السجل؟")) {
+            let list = JSON.parse(localStorage.getItem('patients_db'));
+            list.splice(index, 1);
+            localStorage.setItem('patients_db', JSON.stringify(list));
+            loadTable();
+        }
+    }
+
+    // وظيفة البحث (الفلترة)
+    function filterTable() {
+        let input = document.getElementById("searchInput").value.toUpperCase();
+        let rows = document.querySelector("#patientTable tbody").rows;
+        for (let row of rows) {
+            let nameCol = row.cells[1].textContent.toUpperCase();
+            let addrCol = row.cells[4].textContent.toUpperCase();
+            row.style.display = (nameCol.includes(input) || addrCol.includes(input)) ? "" : "none";
+        }
+    }
+
+    window.onload = loadTable;
+</script>
+
+</body>
+</html>
